@@ -54,10 +54,16 @@ class CPU:
         elif op == 'CMP':
             if self.reg[reg_a] == self.reg[reg_b]:
                 self.equalFlag = True
+                self.lessThanFlag = False
+                self.greaterThanFlag = False
             elif self.reg[reg_a] < self.reg[reg_b]:
                 self.lessThanFlag = True
+                self.equalFlag = False
+                self.greaterThanFlag = False
             else:
                 self.greaterThanFlag = True
+                self.equalFlag = False
+                self.lessThanFlag = False
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -126,6 +132,43 @@ class CPU:
                 self.alu('MUL', self.ram_read(self.pc + 1),
                          self.ram_read(self.pc + 2))
                 self.pc += 1 + (cmd >> 6)  # should be 3
+
+            elif cmd == CMP:
+                # Compare the values in two registers.
+                self.alu('CMP', self.ram_read(self.pc + 1),
+                         self.ram_read(self.pc + 2))
+                self.pc += 1 + (cmd >> 6)  # should be 3
+
+            elif cmd == JMP:
+                # Jump to the address stored in the given register.
+                # Set the PC to the address stored in the given register.
+                registerNumber = self.ram_read(self.pc + 1)
+
+                memoryAddress = self.reg[registerNumber]
+
+                self.pc = memoryAddress
+
+            elif cmd == JEQ:
+                # If equal flag is set to (True, 0), jump to the address stored in the given register.
+                if self.equalFlag == True:
+                    registerNumber = self.ram_read(self.pc + 1)
+
+                    memoryAddress = self.reg[registerNumber]
+
+                    self.pc = memoryAddress
+                else:
+                    self.pc += 1 + (cmd >> 6)
+
+            elif cmd == JNE:
+                # If equal flag is clear (false, 0), jump to the address stored in the given register.
+                if self.equalFlag == False:
+                    registerNumber = self.ram_read(self.pc + 1)
+
+                    memoryAddress = self.reg[registerNumber]
+
+                    self.pc = memoryAddress
+                else:
+                    self.pc += 1 + (cmd >> 6)
 
             elif cmd == PUSH:
                 # decrement the stack pointer by one
