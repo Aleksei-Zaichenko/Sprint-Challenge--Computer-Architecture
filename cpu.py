@@ -12,6 +12,9 @@ class CPU:
         self.ram = [0] * 256
         self.reg = [0] * 8
         self.stackPointerIndex = 7
+        self.equalFlag = False
+        self.lessThanFlag = False
+        self.greaterThanFlag = False
 
     def load(self, fileName):
         """Load a program into memory."""
@@ -48,6 +51,13 @@ class CPU:
             self.reg[reg_a] -= self.reg[reg_b]
         elif op == 'MUL':
             self.reg[reg_a] *= self.reg[reg_b]
+        elif op == 'CMP':
+            if self.reg[reg_a] == self.reg[reg_b]:
+                self.equalFlag = True
+            elif self.reg[reg_a] < self.reg[reg_b]:
+                self.lessThanFlag = True
+            else:
+                self.greaterThanFlag = True
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -85,6 +95,12 @@ class CPU:
         POP = 0b01000110
         CALL = 0b01010000
         RET = 0b00010001
+
+        # instructions added for Sprint
+        CMP = 0b10100111
+        JMP = 0b01010100
+        JEQ = 0b01010101
+        JNE = 0b01010110
 
         running = True
 
