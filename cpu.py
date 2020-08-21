@@ -70,6 +70,8 @@ class CPU:
             else:
                 self.reg[reg_a] %= self.reg[reg_b]
                 return True
+        elif op == 'AND':
+            self.reg[reg_a] &= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -115,6 +117,7 @@ class CPU:
         JNE = 0b01010110
 
         MOD = 0b10100100
+        AND = 0b10101000
 
         running = True
 
@@ -188,6 +191,12 @@ class CPU:
                 else:
                     print('Can not divide by 0, the system encountered an error')
                     running = False
+
+            elif cmd == AND:
+                self.alu('AND', self.ram_read(self.pc + 1),
+                         self.ram_read(self.pc + 2))
+
+                self.pc += 1 + (cmd >> 6)  # should be 3
 
             elif cmd == PUSH:
                 # decrement the stack pointer by one
