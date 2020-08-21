@@ -57,13 +57,13 @@ class CPU:
                 self.lessThanFlag = False
                 self.greaterThanFlag = False
             elif self.reg[reg_a] < self.reg[reg_b]:
-                self.lessThanFlag = True
                 self.equalFlag = False
+                self.lessThanFlag = True
                 self.greaterThanFlag = False
             else:
-                self.greaterThanFlag = True
                 self.equalFlag = False
                 self.lessThanFlag = False
+                self.greaterThanFlag = True
         elif op == 'MOD':
             if self.reg[reg_b] == 0:
                 return False
@@ -72,6 +72,8 @@ class CPU:
                 return True
         elif op == 'AND':
             self.reg[reg_a] &= self.reg[reg_b]
+        elif op == 'NOT':
+            self.reg[reg_a] = bin(0b11111111 - self.reg[reg_a])
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -118,6 +120,7 @@ class CPU:
 
         MOD = 0b10100100
         AND = 0b10101000
+        NOT = 0b01101001
 
         running = True
 
@@ -193,10 +196,18 @@ class CPU:
                     running = False
 
             elif cmd == AND:
+                # Bitwise-AND the values in registerA and registerB, then store the result in registerA.
                 self.alu('AND', self.ram_read(self.pc + 1),
                          self.ram_read(self.pc + 2))
 
                 self.pc += 1 + (cmd >> 6)  # should be 3
+
+            elif cmd == NOT:
+                # Perform a bitwise-NOT on the value in a register, storing the result in the register.
+                self.alu('NOT', self.ram_read(self.pc + 1),
+                         self.ram_read(self.pc + 1))
+
+                self.pc += 1 + (cmd >> 6)  # should be 2
 
             elif cmd == PUSH:
                 # decrement the stack pointer by one
