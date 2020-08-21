@@ -64,6 +64,12 @@ class CPU:
                 self.greaterThanFlag = True
                 self.equalFlag = False
                 self.lessThanFlag = False
+        elif op == 'MOD':
+            if self.reg[reg_b] == 0:
+                return False
+            else:
+                self.reg[reg_a] %= self.reg[reg_b]
+                return True
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -107,6 +113,8 @@ class CPU:
         JMP = 0b01010100
         JEQ = 0b01010101
         JNE = 0b01010110
+
+        MOD = 0b10100100
 
         running = True
 
@@ -169,6 +177,17 @@ class CPU:
                     self.pc = memoryAddress
                 else:
                     self.pc += 1 + (cmd >> 6)
+
+            elif cmd == MOD:
+                # Divide the value in the first register by the value in the second, storing the remainder of the result in registerA.
+                # If the value in the second register is 0, the system should print an error message and halt.
+                result = self.alu('MOD', self.ram_read(self.pc + 1),
+                                  self.ram_read(self.pc + 2))
+                if result:
+                    self.pc += 1 + (cmd >> 6)  # should be 3
+                else:
+                    print('Can not divide by 0, the system encountered an error')
+                    running = False
 
             elif cmd == PUSH:
                 # decrement the stack pointer by one
